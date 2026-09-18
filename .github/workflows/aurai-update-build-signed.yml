@@ -1,0 +1,166 @@
+name: Aurai Companion Signed Update & Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Apply phone update archive if present
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -f aurai-update.tar.gz ]; then
+            echo "Applying aurai-update.tar.gz..."
+            tar -tzf aurai-update.tar.gz >/dev/null
+            tar -xzf aurai-update.tar.gz -C "$GITHUB_WORKSPACE"
+            rm -f aurai-update.tar.gz
+
+            test -f index.html
+            test -f app.js
+            test -f android/app/build.gradle
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add --all -- ':!.github/workflows/**'
+
+            if git diff --cached --quiet; then
+              echo "Update archive contained no repository changes."
+            else
+              git commit -m "Update Aurai Companion"
+              git push origin HEAD:"${GITHUB_REF_NAME}"
+              echo "Update saved to repository."
+            fi
+          else
+            echo "No aurai-update.tar.gz found. Building the current repository version."
+          fi
+
+      - name: Verify project
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f index.html
+          test -f styles.css
+          test -f data.js
+          test -f app.js
+          test -f android/app/build.gradle
+          echo "Project files verified."
+
+      - name: Check signing secrets
+        shell: bash
+        env:
+          AURAI_KEYSTORE_BASE64: ${{ secrets.AURAI_KEYSTORE_BASE64 }}
+          AURAI_SIGNING_PASSWORD: ${{ secrets.AURAI_SIGNING_PASSWORD }}
+          AURAI_KEY_ALIAS: ${{ secrets.AURAI_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          [ -n "$AURAI_KEYSTORE_BASE64" ] || { echo "::error::Missing secret AURAI_KEYSTORE_BASE64"; exit 1; }
+          [ -n "$AURAI_SIGNING_PASSWORD" ] || { echo "::error::Missing secret AURAI_SIGNING_PASSWORD"; exit 1; }
+          [ -n "$AURAI_KEY_ALIAS" ] || { echo "::error::Missing secret AURAI_KEY_ALIAS"; exit 1; }
+          echo "Signing secrets are configured."
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Prepare Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
+
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(command -v sdkmanager || true)"
+          fi
+
+          if [ -z "$SDKMANAGER" ] || [ ! -x "$SDKMANAGER" ]; then
+            echo "::error::sdkmanager was not found on the GitHub runner."
+            exit 1
+          fi
+
+          "$SDKMANAGER" --version
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Sync web app into Android package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p android/app/src/main/assets/www
+          rm -rf android/app/src/main/assets/www/*
+          cp index.html styles.css data.js app.js icon.svg icon-192.png icon-512.png manifest.webmanifest sw.js android/app/src/main/assets/www/
+
+      - name: Build unsigned release APK
+        shell: bash
+        working-directory: android
+        run: gradle :app:assembleRelease
+
+      - name: Sign release APK
+        shell: bash
+        env:
+          AURAI_KEYSTORE_BASE64: ${{ secrets.AURAI_KEYSTORE_BASE64 }}
+          AURAI_SIGNING_PASSWORD: ${{ secrets.AURAI_SIGNING_PASSWORD }}
+          AURAI_KEY_ALIAS: ${{ secrets.AURAI_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/35.0.0"
+          UNSIGNED="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          ALIGNED="$RUNNER_TEMP/Aurai-Companion-aligned.apk"
+          KEYSTORE="$RUNNER_TEMP/aurai-companion-release.p12"
+
+          test -f "$UNSIGNED"
+          printf '%s' "$AURAI_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
+          chmod 600 "$KEYSTORE"
+
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$UNSIGNED" "$ALIGNED"
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks "$KEYSTORE" \
+            --ks-type PKCS12 \
+            --ks-key-alias "$AURAI_KEY_ALIAS" \
+            --ks-pass env:AURAI_SIGNING_PASSWORD \
+            --key-pass env:AURAI_SIGNING_PASSWORD \
+            --out Aurai-Companion-Android.apk \
+            "$ALIGNED"
+
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs Aurai-Companion-Android.apk
+          sha256sum Aurai-Companion-Android.apk | tee Aurai-Companion-Android.sha256
+          rm -f "$KEYSTORE" "$ALIGNED"
+
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: Aurai-Companion-Android-Signed
+          path: |
+            Aurai-Companion-Android.apk
+            Aurai-Companion-Android.sha256
+          retention-days: 30
+
+      - name: Finished
+        shell: bash
+        run: |
+          echo "Aurai Companion signed APK built successfully."
+          echo "Download Aurai-Companion-Android-Signed from this workflow run."
