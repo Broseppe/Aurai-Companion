@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#17130e" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="Aurai Companion — a fast Outward recipe, alchemy and field guide." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Aurai" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Aurai Companion</title>
+</head>
+<body>
+  <div class="splash" id="splash" aria-hidden="true">
+    <div class="splash-mark"><img src="icon.svg" alt="" /></div>
+    <strong>Aurai Companion</strong>
+    <span>Traveler's field guide</span>
+  </div>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="icon-button" id="menuBtn" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <button class="brand-wrap" id="brandHome" aria-label="Go home">
+        <img class="brand-icon" src="icon.svg" alt="" />
+        <span><strong>Aurai Companion</strong><small id="networkLabel">Field guide</small></span>
+      </button>
+      <button class="icon-button" id="installBtn" aria-label="Install app">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 18v2h14v-2"/></svg>
+      </button>
+    </header>
+
+    <aside class="drawer" id="drawer" aria-hidden="true">
+      <div class="drawer-head"><img class="drawer-icon" src="icon.svg" alt="" /><div><strong>Aurai Companion</strong><span>Traveler's field guide</span></div></div>
+      <nav id="drawerNav"></nav>
+      <div class="drawer-actions">
+        <button id="drawerInstall">Install / app info</button>
+        <button id="drawerUpdate">Check for update</button>
+      </div>
+      <div class="drawer-note">Fan-made companion for Outward. Wiki links and live search use outward.wiki.gg. Not affiliated with Nine Dots Studio.</div>
+    </aside>
+    <div class="backdrop" id="backdrop"></div>
+
+    <main id="app" tabindex="-1"></main>
+
+    <nav class="bottom-nav" aria-label="Primary navigation">
+      <button data-route="home" class="active"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9h-6v-6H9v6H3z"/></svg><span>Home</span></button>
+      <button data-route="recipes"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v5l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-5-9V3M8 14h8"/></svg><span>Recipes</span></button>
+      <button data-route="pantry"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 13H6zM8 8a4 4 0 0 1 8 0"/></svg><span>My Items</span></button>
+      <button data-route="wiki"><svg viewBox="0 0 24 24"><path d="M4 4h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H4zM20 4h-3a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h3z"/></svg><span>Wiki</span></button>
+      <button data-route="saved"><svg viewBox="0 0 24 24"><path d="M12 20 4.7 12.7a4.6 4.6 0 0 1 6.5-6.5L12 7l.8-.8a4.6 4.6 0 0 1 6.5 6.5z"/></svg><span>Saved</span></button>
+    </nav>
+  </div>
+
+  <section class="sheet" id="infoSheet" aria-hidden="true">
+    <div class="grabber"></div>
+    <button class="sheet-close" data-close-sheet aria-label="Close">×</button>
+    <div id="infoSheetContent"></div>
+  </section>
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+  <div class="update-bar" id="updateBar" hidden>
+    <span><strong>Update ready</strong><small>A new version of Aurai Companion is available.</small></span>
+    <button id="applyUpdate">Update</button>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
