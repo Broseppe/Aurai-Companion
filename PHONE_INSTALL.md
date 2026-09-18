@@ -1,29 +1,31 @@
-# Install Aurai Companion using only your phone
+# Signed Android builds
 
-## First-time phone upload (no PC)
+Aurai Companion now uses a permanent Android signing key for release APKs.
 
-1. Create a GitHub repository for Aurai Companion. A public repository is the simplest option for GitHub Pages on GitHub Free.
-2. Upload `aurai-companion-source.tar.gz` to the repository root.
-3. In GitHub's web interface choose **Add file → Create new file** and name it `.github/workflows/bootstrap.yml`.
-4. Paste the supplied `bootstrap.yml` contents and commit it to the default branch.
-5. Open **Actions → Install Aurai Companion → Run workflow**.
-6. When that run succeeds, refresh the repository. The complete web app, Android project, documentation and normal build workflows will be present.
+If you already installed one of the earlier debug-signed test APKs, Android will not accept the first permanently signed APK as an update because the signatures are different. Uninstall the old test build once, then install the signed build. After that, future signed releases can install normally over the existing app.
 
-## Recommended route: installable web app (PWA)
+Keep the signing-key backup private and outside the public GitHub repository.
 
-1. In the repository open **Settings → Pages**.
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. Open **Actions → Deploy Web App → Run workflow**.
-4. Open the Pages address shown by the successful deployment.
-5. Android Chrome: **⋮ → Install app**. iPhone Safari: **Share → Add to Home Screen**.
+---
 
-This is the recommended route because app updates can be delivered without reinstalling an APK.
+# Installing Aurai Companion from your phone
 
-## Android APK route
+A PC is not needed. GitHub builds the Android APK in the cloud.
 
-1. Open **Actions → Build Android APK → Run workflow**.
-2. When it finishes, open the successful run and download the **Aurai-Companion-Android** artifact.
-3. Extract that downloaded artifact ZIP on Android.
-4. Tap `Aurai-Companion-Android.apk` and follow Android's install prompt. Android may ask you to allow installs from the browser/files app you used.
+## Build the Android app
 
-No Windows/Mac PC, Android Studio, local Gradle installation or USB cable is required; GitHub performs the Android build in the cloud.
+1. Open the repository on GitHub.
+2. Go to **Actions**.
+3. Open **Aurai Companion Update & Build**.
+4. Tap **Run workflow**.
+5. When the run finishes successfully, open it and download the **Aurai-Companion-Android** artifact.
+6. Extract the downloaded ZIP and open `Aurai-Companion-Android.apk`.
+7. If Android asks, allow your browser or Files app to install apps from this source, then continue with the installation.
+
+## Updating the app
+
+For an app update, upload `aurai-update.tar.gz` to the root of the repository and run **Aurai Companion Update & Build** again.
+
+The workflow applies the source update, removes the update archive from the repository, builds a new APK and provides it as an artifact.
+
+At the moment the APK is debug-signed, so Android may occasionally require the existing app to be removed before installing a build made with a different signing key. A permanent release signing key is the next infrastructure improvement planned for the project.

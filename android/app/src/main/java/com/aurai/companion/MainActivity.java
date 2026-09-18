@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        settings.setUserAgentString(settings.getUserAgentString() + " AuraiAndroid/2.1.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " AuraiAndroid/2.3.1");
 
         webView.setWebViewClient(new WebViewClient() {
             private boolean route(Uri uri) {

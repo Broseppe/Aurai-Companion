@@ -1,50 +1,60 @@
 # Aurai Companion
 
-A mobile-first fan companion for **Outward** with recipe lookup, alchemy/cooking references, an inventory-to-recipe matcher, concise field guides, saved recipes, and live search of the current Outward Wiki.
+Aurai Companion is a phone-first reference app for **Outward**. The aim is simple: spend less time digging through browser tabs and more time playing.
 
-## Version 2.1
+It brings recipes, alchemy, ingredient matching, saved lists and quick gameplay notes into one place. Detailed articles still open on the Outward Wiki when you need the full explanation.
 
-This release focuses on making the project feel like a real phone app and making installation possible without a PC.
+## What you can do
 
-- New custom Aurai compass icon and launch splash.
-- Native-style five-tab bottom navigation.
-- Live online Wiki Explorer using the Outward Wiki MediaWiki API with a direct-search fallback.
-- Online/offline status.
-- Install/app-info sheet with platform-aware instructions.
-- PWA update notification and one-tap refresh when a new version is available.
-- Improved recipe search, pantry matching, grouped ingredient counts, favourites and recipe sharing.
-- Android WebView wrapper source included.
-- GitHub Actions workflow builds an Android APK entirely in the cloud.
-- GitHub Pages workflow hosts the PWA automatically.
+- Search recipes by name, ingredient or purpose.
+- Use slightly misspelled searches such as `livweedy` and still find the right ingredient or recipe.
+- Add the ingredients in your bag to **My Items** and see:
+  - what you can craft immediately;
+  - the closest recipes;
+  - exactly what is still missing.
+- Tap an ingredient to see other recipes that use it.
+- Save inventory loadouts and restore them later.
+- Add recipes to a **Shopping List** and combine all missing ingredients into one list.
+- Compare two recipes side by side.
+- Save favourite recipes on the device.
+- Search the current Outward Wiki for quests, enemies, locations, equipment and detailed item pages.
 
-The project deliberately does **not** ship a huge offline copy of the wiki. Only the compact quick-reference recipe data and guides are bundled; broader reference content is searched online.
+## Recipe database
 
-## Phone-only installation
+The app includes a small starter set so it is useful immediately. When internet access is available, **Sync database** downloads the structured recipe index from the Outward Wiki and stores it in IndexedDB on the device.
 
-### Option A — PWA / home-screen app
+That gives the app the best of both approaches:
 
-Once the repository is on GitHub:
+- recipe search and **My Items** stay fast and work offline after a sync;
+- the database can be refreshed without bundling a copy of the entire wiki into the APK;
+- detailed wiki pages remain online, so the app does not try to duplicate long articles or guides.
 
-1. In the repository, open **Settings → Pages**.
-2. Under **Build and deployment**, choose **GitHub Actions**.
-3. Run the **Deploy Web App** workflow if it has not run automatically.
-4. Open the resulting GitHub Pages address on your phone.
-5. On Android Chrome, choose **Install app** / **Add to Home screen**. On iPhone Safari, use **Share → Add to Home Screen**.
+Aurai checks for a recipe-index refresh in the background when the cached data is more than a week old. You can also refresh it manually from the Recipes screen.
 
-After that, updates are deployed by pushing changes to `main`; the app detects a new PWA version and displays an **Update** button.
+## My Items
 
-### Option B — Android APK, no PC or Android Studio
+Open **My Items**, type an ingredient and tap **Add**. Ingredient suggestions appear as you type, and the matcher tolerates small spelling mistakes.
 
-The repository contains an Android wrapper and `.github/workflows/build-android.yml`.
+The results are split into:
 
-1. Put the project in a GitHub repository from your phone or through a connected GitHub integration.
-2. Open **Actions → Build Android APK**.
-3. Tap **Run workflow**. Pushing to `main` also starts the build automatically when app files change.
-4. Open the finished workflow and download the **Aurai-Companion-Android** artifact.
-5. Extract the artifact ZIP on the phone and tap `Aurai-Companion-Android.apk`.
-6. Android may ask you to allow your browser or Files app to install unknown apps. Approve it only for the app you downloaded from your own repository.
+- **Craftable now** — you already have every required ingredient.
+- **Closest matches** — recipes that use what you have, sorted by how little is missing.
 
-The current workflow creates a debug-signed APK. It is suitable for personal sideloading. If this app is later distributed publicly, use a private release signing key stored in GitHub Actions Secrets and switch the workflow to a signed release build.
+Quantities matter. If a recipe needs two of the same ingredient, Aurai checks that you actually have two.
+
+A small number of known generic ingredient substitutions are supported as well, such as Raw Meat satisfying recipes that call for Meat. The app keeps this conservative rather than guessing at every possible substitution.
+
+## Shopping List
+
+Open a recipe and tap **Shopping list**. Aurai combines the ingredients from every planned recipe, subtracts what is already in **My Items**, and shows only what you still need.
+
+The list can be copied to the clipboard for quick reference while playing.
+
+## Android build
+
+The Android APK is built through GitHub Actions. Run **Aurai Companion Update & Build**, then download the `Aurai-Companion-Android` artifact from the completed run.
+
+For an app update, place the supplied `aurai-update.tar.gz` in the repository root and run the same workflow. It applies the changed files, rebuilds the APK and gives you the new artifact.
 
 ## Project structure
 
@@ -59,23 +69,20 @@ Aurai Companion/
 ├── icon.svg
 ├── icon-192.png
 ├── icon-512.png
-├── android/
-│   └── app/...
-└── .github/workflows/
-    ├── build-android.yml
-    └── pages.yml
+└── android/
 ```
 
-## Wiki integration
+There is no JavaScript framework or build step for the web app. The Android project is a small WebView wrapper around the same interface.
 
-Live search uses:
+## Data and attribution
 
-`https://outward.wiki.gg/api.php`
+Aurai Companion is an unofficial fan-made project and is not affiliated with Nine Dots Studio.
 
-with MediaWiki search requests and `origin=*`. If the API request cannot be completed, the UI falls back to a normal Outward Wiki search page.
+Recipe facts and wiki links are based on the community-maintained **Outward Wiki** at `outward.wiki.gg`. Wiki content is generally available under **CC BY-NC-SA 4.0** unless a page says otherwise. Aurai stores a compact structured recipe index and links back to the original wiki pages rather than copying full article text.
 
-Wiki-derived pages remain on `outward.wiki.gg`; the app does not mirror the full wiki locally.
+## Android release signing
 
-## Attribution
+Android releases are built in GitHub Actions using a permanent signing key stored as repository secrets. The signing key itself is not stored in this repository. This means future APKs can be installed over an existing signed Aurai Companion installation without uninstalling it first.
 
-Aurai Companion is an unofficial fan-made utility and is not affiliated with Nine Dots Studio. Outward Wiki pages are linked to their original source. Wiki content is subject to the licensing and terms stated by the Outward Wiki/wiki.gg.
+The signing material should be backed up securely. Losing the release key would prevent future APKs from updating an installation signed with that key.
+

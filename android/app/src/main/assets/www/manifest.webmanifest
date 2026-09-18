@@ -1,22 +1,70 @@
 {
-  "id":"./",
-  "name":"Aurai Companion — Outward Field Guide",
-  "short_name":"Aurai",
-  "description":"Recipes, alchemy, ingredient matching, tips and live Outward Wiki reference.",
-  "start_url":"./?source=installed",
-  "scope":"./",
-  "display":"standalone",
-  "display_override":["window-controls-overlay","standalone"],
-  "background_color":"#15110c",
-  "theme_color":"#17130e",
-  "orientation":"portrait-primary",
-  "categories":["games","utilities","reference"],
-  "icons":[
-    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  "id": "./",
+  "name": "Aurai Companion \u2014 Outward Field Guide",
+  "short_name": "Aurai",
+  "description": "Recipes, alchemy, an offline recipe cache, ingredient matching, shopping lists and Outward Wiki reference.",
+  "start_url": "./?source=installed",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
   ],
-  "shortcuts":[
-    {"name":"Recipes","short_name":"Recipes","url":"./?route=recipes","icons":[{"src":"icon-192.png","sizes":"192x192"}]},
-    {"name":"Wiki Lookup","short_name":"Wiki","url":"./?route=wiki","icons":[{"src":"icon-192.png","sizes":"192x192"}]}
+  "background_color": "#15110c",
+  "theme_color": "#17130e",
+  "orientation": "portrait-primary",
+  "categories": [
+    "games",
+    "utilities",
+    "reference"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Recipes",
+      "short_name": "Recipes",
+      "url": "./?route=recipes",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "My Items",
+      "short_name": "My Items",
+      "url": "./?route=pantry",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Wiki Lookup",
+      "short_name": "Wiki",
+      "url": "./?route=wiki",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }
